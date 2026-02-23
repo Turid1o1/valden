@@ -1,0 +1,65 @@
+name: release-macos-unsigned
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-macos-unsigned:
+    runs-on: macos-14
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: client
+    env:
+      REQUIRE_NOTARIZATION: "false"
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build unsigned macOS artifacts
+        run: npm run package:mac:unsigned
+
+      - name: Validate artifacts presence
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          dmgs=(dist/*.dmg)
+          zips=(dist/*.zip)
+          if [[ ${#dmgs[@]} -eq 0 ]]; then
+            echo "No DMG artifacts found in dist/"
+            exit 1
+          fi
+          if [[ ${#zips[@]} -eq 0 ]]; then
+            echo "No ZIP artifacts found in dist/"
+            exit 1
+          fi
+
+      - name: Publish warning summary
+        run: |
+          {
+            echo "### Unsigned macOS release"
+            echo ""
+            echo "These artifacts are not signed and not notarized."
+            echo "macOS Gatekeeper will show warnings on first launch."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: valden-macos-unsigned
+          path: |
+            client/dist/*.dmg
+            client/dist/*.zip
+            client/dist/*.blockmap
