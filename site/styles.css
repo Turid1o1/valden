@@ -199,9 +199,25 @@ body.page.page-transition-out {
   position: absolute;
   inset: 12% 16%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 205, 98, 0.45), rgba(255, 205, 98, 0));
-  filter: blur(14px);
+  z-index: 0;
+  background: radial-gradient(circle, rgba(255, 205, 98, 0.32), rgba(255, 205, 98, 0));
+  filter: blur(16px);
   animation: glow-pulse 4.2s ease-in-out infinite;
+}
+
+.hero-star-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 8% 12%;
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 26% 38%, rgba(255, 219, 141, 0.2), rgba(255, 219, 141, 0) 44%),
+    radial-gradient(circle at 72% 62%, rgba(126, 188, 255, 0.16), rgba(126, 188, 255, 0) 48%);
+  filter: blur(18px);
+  mix-blend-mode: screen;
+  animation: glow-orbit 8.8s ease-in-out infinite;
 }
 
 .hero-star {
@@ -210,8 +226,8 @@ body.page.page-transition-out {
   width: 100%;
   height: auto;
   filter:
-    drop-shadow(0 0 36px rgba(255, 198, 92, 0.62))
-    drop-shadow(0 0 26px rgba(75, 162, 255, 0.38));
+    drop-shadow(0 0 28px rgba(255, 198, 92, 0.44))
+    drop-shadow(0 0 20px rgba(75, 162, 255, 0.28));
   animation: star-float 7.2s ease-in-out infinite, star-sway 11s ease-in-out infinite;
 }
 
@@ -642,13 +658,40 @@ body.page.page-transition-out {
 @keyframes glow-pulse {
   0%,
   100% {
-    opacity: 0.55;
+    opacity: 0.34;
     transform: scale(1);
   }
 
   50% {
-    opacity: 0.9;
-    transform: scale(1.08);
+    opacity: 0.56;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes glow-orbit {
+  0% {
+    opacity: 0.24;
+    transform: translate3d(-1.5%, -1%, 0) scale(1) rotate(0deg);
+  }
+
+  25% {
+    opacity: 0.34;
+    transform: translate3d(1.5%, -2%, 0) scale(1.03) rotate(45deg);
+  }
+
+  50% {
+    opacity: 0.46;
+    transform: translate3d(2.5%, 1.5%, 0) scale(1.06) rotate(95deg);
+  }
+
+  75% {
+    opacity: 0.32;
+    transform: translate3d(-1.2%, 2.3%, 0) scale(1.02) rotate(145deg);
+  }
+
+  100% {
+    opacity: 0.24;
+    transform: translate3d(-1.5%, -1%, 0) scale(1) rotate(190deg);
   }
 }
 
