@@ -134,6 +134,37 @@ function deliverActivationPayload(payload) {
   mainWindow.webContents.send("valden:activation-payload", payload);
 }
 
+function ensureSingleInstalledAppOnMac() {
+  if (process.platform !== "darwin" || !app.isPackaged) {
+    return false;
+  }
+
+  try {
+    if (app.isInApplicationsFolder()) {
+      return false;
+    }
+
+    const moved = app.moveToApplicationsFolder({
+      conflictHandler: (conflictType) => {
+        // Keep a single VALDEN.app in /Applications by allowing default replacement behavior.
+        if (conflictType === "exists" || conflictType === "existsAndRunning") {
+          return true;
+        }
+        return true;
+      }
+    });
+
+    if (moved) {
+      return true;
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("[install] failed to move app to /Applications", error);
+  }
+
+  return false;
+}
+
 function createMainWindow() {
   const win = new BrowserWindow({
     width: 1400,
@@ -374,6 +405,10 @@ app.on("open-url", (event, rawURL) => {
 });
 
 app.whenReady().then(() => {
+  if (ensureSingleInstalledAppOnMac()) {
+    return;
+  }
+
   if (app.isPackaged) {
     app.setAsDefaultProtocolClient(APP_PROTOCOL);
   } else if (process.argv[1]) {
