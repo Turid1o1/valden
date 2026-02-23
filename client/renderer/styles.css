@@ -376,6 +376,16 @@ textarea {
   cursor: pointer;
   padding: 0;
   font-size: 12px;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.link-btn:hover {
+  color: var(--gold-hover);
+}
+
+.link-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .screen-session {

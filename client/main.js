@@ -3,6 +3,8 @@ const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const crypto = require("node:crypto");
 const path = require("node:path");
+const http = require("node:http");
+const https = require("node:https");
 const { spawn } = require("node:child_process");
 
 let nativeHelperPromise = null;
@@ -111,6 +113,79 @@ function parseActivationPayloadFromArgv(argv) {
     }
   }
   return null;
+}
+
+function getLatestInstallerURL(platform, arch) {
+  const base = "https://valden.space/downloads";
+  if (platform === "win32") {
+    return `${base}/VALDEN-latest-x64.exe`;
+  }
+  if (platform === "darwin") {
+    return arch === "arm64" ? `${base}/VALDEN-latest-arm64.dmg` : `${base}/VALDEN-latest-x64.dmg`;
+  }
+  return "";
+}
+
+async function downloadFileWithRedirect(url, destinationPath, redirectsLeft = 5) {
+  if (redirectsLeft < 0) {
+    throw new Error("too many redirects while downloading update");
+  }
+
+  const parsed = new URL(url);
+  const transport = parsed.protocol === "https:" ? https : http;
+
+  await fsp.mkdir(path.dirname(destinationPath), { recursive: true });
+
+  await new Promise((resolve, reject) => {
+    const request = transport.get(parsed, (response) => {
+      const status = Number(response.statusCode || 0);
+
+      if (status >= 300 && status < 400 && response.headers.location) {
+        response.resume();
+        const redirected = new URL(response.headers.location, parsed).toString();
+        downloadFileWithRedirect(redirected, destinationPath, redirectsLeft - 1)
+          .then(resolve)
+          .catch(reject);
+        return;
+      }
+
+      if (status !== 200) {
+        response.resume();
+        reject(new Error(`update download failed: HTTP ${status}`));
+        return;
+      }
+
+      const file = fs.createWriteStream(destinationPath);
+      response.pipe(file);
+
+      file.on("finish", () => {
+        file.close((error) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve();
+        });
+      });
+
+      file.on("error", (error) => {
+        file.destroy();
+        reject(error);
+      });
+    });
+
+    request.on("error", reject);
+    request.setTimeout(120000, () => {
+      request.destroy(new Error("update download timeout"));
+    });
+  }).catch(async (error) => {
+    try {
+      await fsp.rm(destinationPath, { force: true });
+    } catch (_err) {
+      // ignore cleanup failures
+    }
+    throw error;
+  });
 }
 
 function focusMainWindow() {
@@ -457,7 +532,59 @@ ipcMain.handle("valden:save-json", async (_event, { defaultName, content }) => {
 ipcMain.handle("valden:get-meta", () => {
   return {
     version: app.getVersion(),
-    platform: process.platform
+    platform: process.platform,
+    arch: process.arch
+  };
+});
+
+ipcMain.handle("valden:self-update", async () => {
+  const platform = process.platform;
+  const arch = process.arch;
+  const installerURL = getLatestInstallerURL(platform, arch);
+  if (!installerURL) {
+    return { ok: false, error: `Автообновление не поддерживается для ${platform}/${arch}` };
+  }
+
+  if (platform === "win32") {
+    const tempDir = path.join(app.getPath("temp"), "VALDEN");
+    const installerPath = path.join(tempDir, `VALDEN-Setup-latest-${Date.now()}.exe`);
+
+    try {
+      await downloadFileWithRedirect(installerURL, installerPath);
+      const child = spawn(installerPath, [], {
+        detached: true,
+        stdio: "ignore",
+        windowsHide: false
+      });
+      child.unref();
+      setTimeout(() => {
+        app.quit();
+      }, 300);
+      return {
+        ok: true,
+        mode: "installer-started",
+        installerPath,
+        url: installerURL
+      };
+    } catch (error) {
+      try {
+        await shell.openExternal(installerURL);
+      } catch (_openErr) {
+        // ignore fallback failure
+      }
+      return {
+        ok: false,
+        error: `Не удалось запустить автообновление: ${error.message}`,
+        url: installerURL
+      };
+    }
+  }
+
+  await shell.openExternal(installerURL);
+  return {
+    ok: true,
+    mode: "external-opened",
+    url: installerURL
   };
 });
 

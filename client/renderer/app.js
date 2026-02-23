@@ -84,6 +84,7 @@
     bootstrapConsumeBtn: $("bootstrapConsumeBtn"),
     loginError: $("loginError"),
     accountEmail: $("accountEmail"),
+    updateAppBtn: $("updateAppBtn"),
     logoutBtn: $("logoutBtn"),
     settingsBtn: $("settingsBtn"),
     devicePublicId: $("devicePublicId"),
@@ -205,6 +206,12 @@
 
     stream: {
       preferredQuality: localStorage.getItem("valden.stream.quality") || "auto"
+    },
+
+    runtime: {
+      version: "0.0.0",
+      platform: "unknown",
+      arch: "unknown"
     },
 
     logs: []
@@ -946,6 +953,28 @@
     if (els.accountEmail) {
       els.accountEmail.textContent = state.auth.email || "-";
     }
+  }
+
+  function getUpdateInstallHint() {
+    if (state.runtime.platform === "win32") {
+      return "Установщик запущен. Приложение закроется для обновления.";
+    }
+    if (state.runtime.platform === "darwin") {
+      return "Открыт установочный файл macOS. Замените VALDEN в Applications.";
+    }
+    return "Открыт файл обновления.";
+  }
+
+  async function runSelfUpdate() {
+    if (!hasDesktopCapability("selfUpdate")) {
+      throw new Error("Автообновление недоступно");
+    }
+
+    const result = await desktop.selfUpdate();
+    if (!result?.ok) {
+      throw new Error(result?.error || "Не удалось запустить обновление");
+    }
+    return result;
   }
 
   async function loginWithCredentials() {
@@ -2965,15 +2994,36 @@
   }
 
   async function initMeta() {
-    if (!els.appMeta) {
-      return;
-    }
     if (!hasDesktopCapability("getMeta")) {
-      els.appMeta.textContent = "веб-режим";
+      if (els.appMeta) {
+        els.appMeta.textContent = "веб-режим";
+      }
+      if (els.updateAppBtn) {
+        els.updateAppBtn.disabled = true;
+      }
       return;
     }
+
     const meta = await desktop.getMeta();
-    els.appMeta.textContent = `${meta.platform} • v${meta.version}`;
+    state.runtime.version = String(meta.version || "0.0.0");
+    state.runtime.platform = String(meta.platform || "unknown");
+    state.runtime.arch = String(meta.arch || "unknown");
+
+    if (els.appMeta) {
+      els.appMeta.textContent = `${state.runtime.platform}/${state.runtime.arch} • v${state.runtime.version}`;
+    }
+
+    if (els.updateAppBtn) {
+      if (state.runtime.platform === "win32") {
+        els.updateAppBtn.textContent = "Обновить приложение";
+      } else if (state.runtime.platform === "darwin") {
+        els.updateAppBtn.textContent =
+          state.runtime.arch === "arm64" ? "Обновить (macOS M-серия)" : "Обновить (macOS Intel)";
+      } else {
+        els.updateAppBtn.textContent = "Обновление недоступно";
+        els.updateAppBtn.disabled = true;
+      }
+    }
   }
 
   function attachEvents() {
@@ -3035,6 +3085,40 @@
     if (els.logoutBtn) {
       els.logoutBtn.addEventListener("click", async () => {
         await logoutApp();
+      });
+    }
+
+    if (els.updateAppBtn) {
+      els.updateAppBtn.addEventListener("click", async () => {
+        const originalText = els.updateAppBtn.textContent;
+        els.updateAppBtn.disabled = true;
+        if (els.connectInfo) {
+          els.connectInfo.textContent = "Подготовка обновления...";
+        }
+        try {
+          const result = await runSelfUpdate();
+          if (els.connectInfo) {
+            els.connectInfo.textContent = getUpdateInstallHint();
+          }
+          log("info", "Запущено обновление приложения", result);
+        } catch (err) {
+          if (els.connectInfo) {
+            els.connectInfo.textContent = `Не удалось запустить обновление: ${err.message}`;
+          }
+          log("warn", "Ошибка запуска автообновления", { err: err.message });
+          els.updateAppBtn.disabled = false;
+          els.updateAppBtn.textContent = originalText;
+          return;
+        }
+
+        if (state.runtime.platform !== "win32") {
+          window.setTimeout(() => {
+            if (els.updateAppBtn) {
+              els.updateAppBtn.disabled = false;
+              els.updateAppBtn.textContent = originalText;
+            }
+          }, 1500);
+        }
       });
     }
 

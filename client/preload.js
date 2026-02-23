@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld("valdenDesktop", {
   saveJson: (defaultName, content) =>
     ipcRenderer.invoke("valden:save-json", { defaultName, content }),
   getMeta: () => ipcRenderer.invoke("valden:get-meta"),
+  selfUpdate: () => ipcRenderer.invoke("valden:self-update"),
   consumePendingActivation: () => ipcRenderer.invoke("valden:consume-pending-activation"),
   onActivationPayload: (callback) => {
     if (typeof callback !== "function") {
