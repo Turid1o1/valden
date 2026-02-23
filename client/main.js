@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, systemPreferences } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, shell, systemPreferences, session, desktopCapturer } = require("electron");
 const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const crypto = require("node:crypto");
@@ -115,12 +115,16 @@ function parseActivationPayloadFromArgv(argv) {
   return null;
 }
 
-function getLatestInstallerURL(platform, arch) {
+function getLatestInstallerURL(platform, arch, options = {}) {
+  const preferArchive = Boolean(options.preferArchive);
   const base = "https://valden.space/downloads";
   if (platform === "win32") {
     return `${base}/VALDEN-latest-x64.exe`;
   }
   if (platform === "darwin") {
+    if (preferArchive) {
+      return arch === "arm64" ? `${base}/VALDEN-latest-arm64.zip` : `${base}/VALDEN-latest-x64.zip`;
+    }
     return arch === "arm64" ? `${base}/VALDEN-latest-arm64.dmg` : `${base}/VALDEN-latest-x64.dmg`;
   }
   return "";
@@ -188,6 +192,133 @@ async function downloadFileWithRedirect(url, destinationPath, redirectsLeft = 5)
   });
 }
 
+function shellQuote(value) {
+  return `'${String(value || "").replace(/'/g, `'\\''`)}'`;
+}
+
+function powerShellQuote(value) {
+  return `'${String(value || "").replace(/'/g, "''")}'`;
+}
+
+async function findFirstAppBundle(rootDir) {
+  const queue = [rootDir];
+  while (queue.length > 0) {
+    const currentDir = queue.shift();
+    const entries = await fsp.readdir(currentDir, { withFileTypes: true });
+    for (const entry of entries) {
+      const entryPath = path.join(currentDir, entry.name);
+      if (entry.isDirectory() && entry.name.endsWith(".app")) {
+        return entryPath;
+      }
+      if (entry.isDirectory()) {
+        queue.push(entryPath);
+      }
+    }
+  }
+  return "";
+}
+
+function currentMacAppBundlePath() {
+  const candidate = path.resolve(process.execPath, "..", "..", "..");
+  if (candidate.endsWith(".app")) {
+    return candidate;
+  }
+  return "/Applications/VALDEN.app";
+}
+
+async function stageMacArchiveForUpdate(archiveURL) {
+  const stamp = Date.now();
+  const tempRoot = path.join(app.getPath("temp"), `valden-self-update-${stamp}`);
+  const archivePath = path.join(tempRoot, "update.zip");
+  const extractedDir = path.join(tempRoot, "extract");
+  await downloadFileWithRedirect(archiveURL, archivePath);
+  await fsp.mkdir(extractedDir, { recursive: true });
+  await runProcess("/usr/bin/ditto", ["-x", "-k", archivePath, extractedDir]);
+  const appBundlePath = await findFirstAppBundle(extractedDir);
+  if (!appBundlePath) {
+    throw new Error("В архиве обновления не найден .app bundle");
+  }
+  return { tempRoot, archivePath, extractedDir, appBundlePath };
+}
+
+async function spawnMacSelfUpdateScript(staged) {
+  const targetAppPath = currentMacAppBundlePath();
+  const scriptPath = path.join(staged.tempRoot, "apply-update.sh");
+  const script = `#!/bin/bash
+set -e
+APP_PID=${process.pid}
+SRC_APP=${shellQuote(staged.appBundlePath)}
+DST_APP=${shellQuote(targetAppPath)}
+OLD_APP="${DST_APP}.old"
+TMP_ROOT=${shellQuote(staged.tempRoot)}
+
+for i in {1..120}; do
+  if ! kill -0 "$APP_PID" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+rm -rf "$OLD_APP" >/dev/null 2>&1 || true
+if [ -d "$DST_APP" ]; then
+  mv "$DST_APP" "$OLD_APP"
+fi
+
+if ! cp -R "$SRC_APP" "$DST_APP"; then
+  if [ -d "$OLD_APP" ]; then
+    mv "$OLD_APP" "$DST_APP"
+  fi
+  exit 1
+fi
+
+rm -rf "$OLD_APP" >/dev/null 2>&1 || true
+xattr -dr com.apple.quarantine "$DST_APP" >/dev/null 2>&1 || true
+open "$DST_APP" >/dev/null 2>&1 || true
+rm -rf "$TMP_ROOT" >/dev/null 2>&1 || true
+`;
+  await fsp.writeFile(scriptPath, script, { encoding: "utf8", mode: 0o755 });
+  const child = spawn("/bin/bash", [scriptPath], {
+    detached: true,
+    stdio: "ignore"
+  });
+  child.unref();
+  return { scriptPath, targetAppPath };
+}
+
+async function spawnWindowsSilentInstaller(installerPath) {
+  const scriptPath = path.join(app.getPath("temp"), `valden-self-update-${Date.now()}.ps1`);
+  const runningPid = process.pid;
+  const currentExe = process.execPath;
+  const script = `$ErrorActionPreference = "SilentlyContinue"
+$pidToWait = ${runningPid}
+$installerPath = ${powerShellQuote(installerPath)}
+$currentExe = ${powerShellQuote(currentExe)}
+
+for ($i = 0; $i -lt 240; $i++) {
+  if (-not (Get-Process -Id $pidToWait -ErrorAction SilentlyContinue)) {
+    break
+  }
+  Start-Sleep -Milliseconds 500
+}
+
+if (Test-Path $installerPath) {
+  Start-Process -FilePath $installerPath -ArgumentList "/S" -Wait
+}
+
+if (Test-Path $currentExe) {
+  Start-Process -FilePath $currentExe
+}
+`;
+  await fsp.writeFile(scriptPath, script, "utf8");
+  const child = spawn("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath], {
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true
+  });
+  child.unref();
+  return { scriptPath };
+}
+
 function focusMainWindow() {
   if (!mainWindow || mainWindow.isDestroyed()) {
     return;
@@ -238,6 +369,43 @@ function ensureSingleInstalledAppOnMac() {
   }
 
   return false;
+}
+
+function configureDisplayCaptureAutoGrant() {
+  try {
+    const defaultSession = session.defaultSession;
+    if (!defaultSession || typeof defaultSession.setDisplayMediaRequestHandler !== "function") {
+      return;
+    }
+
+    defaultSession.setDisplayMediaRequestHandler(
+      async (_request, callback) => {
+        try {
+          const sources = await desktopCapturer.getSources({
+            types: ["screen"],
+            thumbnailSize: { width: 0, height: 0 },
+            fetchWindowIcons: false
+          });
+          const screenSource = sources.find((source) => String(source.id || "").startsWith("screen:")) || sources[0];
+          if (!screenSource) {
+            callback({});
+            return;
+          }
+          callback({
+            video: screenSource,
+            audio: false
+          });
+        } catch (_error) {
+          callback({});
+        }
+      },
+      {
+        useSystemPicker: false
+      }
+    );
+  } catch (_error) {
+    // Ignore unsupported runtimes.
+  }
 }
 
 function createMainWindow() {
@@ -484,6 +652,8 @@ app.whenReady().then(() => {
     return;
   }
 
+  configureDisplayCaptureAutoGrant();
+
   if (app.isPackaged) {
     app.setAsDefaultProtocolClient(APP_PROTOCOL);
   } else if (process.argv[1]) {
@@ -540,7 +710,9 @@ ipcMain.handle("valden:get-meta", () => {
 ipcMain.handle("valden:self-update", async () => {
   const platform = process.platform;
   const arch = process.arch;
-  const installerURL = getLatestInstallerURL(platform, arch);
+  const installerURL = getLatestInstallerURL(platform, arch, {
+    preferArchive: platform === "darwin"
+  });
   if (!installerURL) {
     return { ok: false, error: `Автообновление не поддерживается для ${platform}/${arch}` };
   }
@@ -551,18 +723,12 @@ ipcMain.handle("valden:self-update", async () => {
 
     try {
       await downloadFileWithRedirect(installerURL, installerPath);
-      const child = spawn(installerPath, [], {
-        detached: true,
-        stdio: "ignore",
-        windowsHide: false
-      });
-      child.unref();
-      setTimeout(() => {
-        app.quit();
-      }, 300);
+      const { scriptPath } = await spawnWindowsSilentInstaller(installerPath);
+      setTimeout(() => app.quit(), 200);
       return {
         ok: true,
-        mode: "installer-started",
+        mode: "silent-installer-script",
+        scriptPath,
         installerPath,
         url: installerURL
       };
@@ -580,12 +746,36 @@ ipcMain.handle("valden:self-update", async () => {
     }
   }
 
-  await shell.openExternal(installerURL);
-  return {
-    ok: true,
-    mode: "external-opened",
-    url: installerURL
-  };
+  if (platform === "darwin") {
+    try {
+      const staged = await stageMacArchiveForUpdate(installerURL);
+      const { scriptPath, targetAppPath } = await spawnMacSelfUpdateScript(staged);
+      setTimeout(() => app.quit(), 200);
+      return {
+        ok: true,
+        mode: "self-replace-script",
+        scriptPath,
+        targetAppPath,
+        archiveURL: installerURL
+      };
+    } catch (error) {
+      const fallbackURL = getLatestInstallerURL(platform, arch, { preferArchive: false });
+      if (fallbackURL) {
+        try {
+          await shell.openExternal(fallbackURL);
+        } catch (_openErr) {
+          // ignore fallback failure
+        }
+      }
+      return {
+        ok: false,
+        error: `Не удалось запустить автообновление macOS: ${error.message}`,
+        url: fallbackURL || installerURL
+      };
+    }
+  }
+
+  return { ok: false, error: `Автообновление не поддерживается для ${platform}/${arch}` };
 });
 
 ipcMain.handle("valden:consume-pending-activation", () => {

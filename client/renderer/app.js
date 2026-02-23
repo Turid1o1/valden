@@ -151,6 +151,11 @@
       viewer: false
     },
 
+    wsReconnectTimers: {
+      agent: null,
+      viewer: null
+    },
+
     rtc: {
       pc: null,
       sessionId: "",
@@ -614,6 +619,10 @@
 
   function closeWs(role, reason = "manual") {
     const ws = state.ws[role];
+    if (state.wsReconnectTimers[role]) {
+      clearTimeout(state.wsReconnectTimers[role]);
+      state.wsReconnectTimers[role] = null;
+    }
     if (!ws) {
       return;
     }
@@ -633,7 +642,19 @@
     if (state.wsManualClose[role]) {
       return;
     }
-    window.setTimeout(() => {
+    if (state.wsReconnectTimers[role]) {
+      return;
+    }
+    const existing = state.ws[role];
+    if (existing && (existing.readyState === WebSocket.OPEN || existing.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
+    state.wsReconnectTimers[role] = window.setTimeout(() => {
+      state.wsReconnectTimers[role] = null;
+      const active = state.ws[role];
+      if (active && (active.readyState === WebSocket.OPEN || active.readyState === WebSocket.CONNECTING)) {
+        return;
+      }
       if (role === "agent" && state.agent.deviceId && state.agent.deviceToken) {
         connectAgentWS().catch((err) => log("error", "Не удалось переподключить WS агента", { err: err.message }));
       }
@@ -694,6 +715,9 @@
         state.ws[role] = null;
       }
       refreshStatus();
+      if (event.reason === "replace") {
+        return;
+      }
       scheduleWsReconnect(role);
     });
 
@@ -957,10 +981,10 @@
 
   function getUpdateInstallHint() {
     if (state.runtime.platform === "win32") {
-      return "Установщик запущен. Приложение закроется для обновления.";
+      return "Обновление запущено. Приложение закроется и установится автоматически.";
     }
     if (state.runtime.platform === "darwin") {
-      return "Открыт установочный файл macOS. Замените VALDEN в Applications.";
+      return "Обновление запущено. VALDEN автоматически заменится и перезапустится.";
     }
     return "Открыт файл обновления.";
   }

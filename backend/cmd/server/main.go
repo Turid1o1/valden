@@ -1053,19 +1053,45 @@ func (a *App) handleWSMessage(ctx context.Context, sender *wsClient, msg WSMessa
 		sender.sessionID = sessionID
 		a.bindSessionPeer(sessionID, sender)
 
-		if err := a.transitionSession(ctx, sessionID, statusNotified, "viewer_hello", map[string]string{"by": sender.role}); err != nil && !errors.Is(err, ErrInvalidTransition) {
+		currentStatus, err := a.sessionStatus(ctx, sessionID)
+		if err != nil {
 			return err
 		}
 
-		agent := a.getSessionPeer(sessionID, "agent")
-		if agent != nil {
-			notifyPayload := a.getSessionNotifyPayload(ctx, sessionID, statusNotified)
-			notify := WSMessage{
-				Type:      "SESSION_NOTIFY",
-				SessionID: sessionID,
-				Payload:   mustJSON(notifyPayload),
+		notifyAgent := false
+		switch currentStatus {
+		case statusRequested:
+			if err := a.transitionSession(ctx, sessionID, statusNotified, "viewer_hello", map[string]string{"by": sender.role}); err != nil && !errors.Is(err, ErrInvalidTransition) {
+				return err
 			}
-			_ = agent.send(notify)
+			notifyAgent = true
+		case statusNotified:
+			notifyAgent = true
+		}
+
+		if notifyAgent {
+			agent := a.getSessionPeer(sessionID, "agent")
+			if agent != nil {
+				notifyPayload := a.getSessionNotifyPayload(ctx, sessionID, statusNotified)
+				notify := WSMessage{
+					Type:      "SESSION_NOTIFY",
+					SessionID: sessionID,
+					Payload:   mustJSON(notifyPayload),
+				}
+				_ = agent.send(notify)
+			}
+		}
+
+		// If viewer missed the original SESSION_ACCEPT (race/reconnect), resync handshake.
+		if currentStatus == statusAccepted || currentStatus == statusConnecting || currentStatus == statusConnected || currentStatus == statusReconnecting {
+			_ = sender.send(WSMessage{
+				Type:      "SESSION_ACCEPT",
+				SessionID: sessionID,
+				Payload: mustJSON(map[string]string{
+					"status": currentStatus,
+					"reason": "viewer_hello_resync",
+				}),
+			})
 		}
 		return a.insertMessageEvent(ctx, sessionID, sender.role, msg)
 
@@ -1078,9 +1104,11 @@ func (a *App) handleWSMessage(ctx context.Context, sender *wsClient, msg WSMessa
 		}
 		a.bindSessionPeer(sessionID, sender)
 		if err := a.transitionSession(ctx, sessionID, statusAccepted, "agent_accept", map[string]string{"by": sender.deviceID}); err != nil {
-			return err
+			if !errors.Is(err, ErrInvalidTransition) {
+				return err
+			}
 		}
-		return a.forwardToPeer(ctx, sender, msg, false)
+		return a.forwardToPeer(ctx, sender, msg, true)
 
 	case "SDP_OFFER":
 		if sessionID == "" {
@@ -1375,6 +1403,18 @@ func (a *App) getAgent(deviceID string) *wsClient {
 	a.mu.RLock()
 	defer a.mu.RUnlock()
 	return a.agentByDevice[deviceID]
+}
+
+func (a *App) sessionStatus(ctx context.Context, sessionID string) (string, error) {
+	var status string
+	err := a.db.QueryRowContext(ctx, `SELECT status FROM sessions WHERE id = $1`, sessionID).Scan(&status)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", fmt.Errorf("session not found: %s", sessionID)
+	}
+	if err != nil {
+		return "", err
+	}
+	return status, nil
 }
 
 func (a *App) markOfferSeen(sessionID string) {

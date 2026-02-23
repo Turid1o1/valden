@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Publish latest macOS installers into web/site/downloads and update latest.json.
+Publish latest desktop installers into site/downloads and update latest.json.
 
 Usage:
   python3 scripts/publish_installers.py
-  python3 scripts/publish_installers.py --dist-dir client/dist --downloads-dir web/site/downloads
+  python3 scripts/publish_installers.py --dist-dir client/dist --downloads-dir site/downloads
 """
 
 from __future__ import annotations
@@ -20,12 +20,13 @@ import sys
 from dataclasses import dataclass
 
 
-INSTALLER_RE = re.compile(
-    r"^VALDEN-(?P<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.\-]+)?)-(?P<arch>arm64|x64)\.(?P<fmt>dmg|zip)$"
+VERSION_RE = r"\d+\.\d+\.\d+(?:-[0-9A-Za-z.\-]+)?"
+INSTALLER_RE_ARCH = re.compile(
+    rf"^VALDEN-(?P<version>{VERSION_RE})-(?P<arch>arm64|x64)(?:-mac)?\.(?P<fmt>dmg|zip)$"
 )
-INSTALLER_RE_NO_ARCH = re.compile(
-    r"^VALDEN-(?P<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.\-]+)?)\.(?P<fmt>dmg|zip)$"
-)
+INSTALLER_RE_MAC_X64 = re.compile(rf"^VALDEN-(?P<version>{VERSION_RE})-mac\.(?P<fmt>dmg|zip)$")
+INSTALLER_RE_NO_ARCH = re.compile(rf"^VALDEN-(?P<version>{VERSION_RE})\.(?P<fmt>dmg|zip)$")
+INSTALLER_RE_WIN = re.compile(rf"^VALDEN-Setup-(?P<version>{VERSION_RE})-(?P<arch>x64)\.(?P<fmt>exe)$")
 
 
 @dataclass
@@ -59,16 +60,15 @@ def parse_version_key(version: str):
 
 def collect_installers(dist_dir: pathlib.Path) -> list[Installer]:
     installers: list[Installer] = []
-    versions_with_arm64: set[tuple[str, str]] = set()
 
     for path in sorted(dist_dir.glob("VALDEN-*")):
         if not path.is_file():
             continue
-        match = INSTALLER_RE.match(path.name)
-        if match:
-            version = match.group("version")
-            arch = match.group("arch")
-            fmt = match.group("fmt")
+        match_arch = INSTALLER_RE_ARCH.match(path.name)
+        if match_arch:
+            version = match_arch.group("version")
+            arch = match_arch.group("arch")
+            fmt = match_arch.group("fmt")
             installers.append(
                 Installer(
                     source_path=path,
@@ -77,25 +77,43 @@ def collect_installers(dist_dir: pathlib.Path) -> list[Installer]:
                     fmt=fmt,
                 )
             )
-            if arch == "arm64":
-                versions_with_arm64.add((version, fmt))
+            continue
+
+        match_mac_x64 = INSTALLER_RE_MAC_X64.match(path.name)
+        if match_mac_x64:
+            installers.append(
+                Installer(
+                    source_path=path,
+                    version=match_mac_x64.group("version"),
+                    arch="x64",
+                    fmt=match_mac_x64.group("fmt"),
+                )
+            )
             continue
 
         match_no_arch = INSTALLER_RE_NO_ARCH.match(path.name)
-        if not match_no_arch:
+        if match_no_arch:
+            installers.append(
+                Installer(
+                    source_path=path,
+                    version=match_no_arch.group("version"),
+                    arch="x64",
+                    fmt=match_no_arch.group("fmt"),
+                )
+            )
             continue
 
-        version = match_no_arch.group("version")
-        fmt = match_no_arch.group("fmt")
-        inferred_arch = "x64" if (version, fmt) in versions_with_arm64 else "x64"
-        installers.append(
-            Installer(
-                source_path=path,
-                version=version,
-                arch=inferred_arch,
-                fmt=fmt,
+        match_win = INSTALLER_RE_WIN.match(path.name)
+        if match_win:
+            installers.append(
+                Installer(
+                    source_path=path,
+                    version=match_win.group("version"),
+                    arch=match_win.group("arch"),
+                    fmt=match_win.group("fmt"),
+                )
             )
-        )
+
     return installers
 
 
@@ -146,7 +164,7 @@ def build_manifest(installers: list[Installer], downloads_dir: pathlib.Path) -> 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dist-dir", default="client/dist", help="Path to Electron build artifacts")
-    parser.add_argument("--downloads-dir", default="web/site/downloads", help="Path to website downloads directory")
+    parser.add_argument("--downloads-dir", default="site/downloads", help="Path to website downloads directory")
     args = parser.parse_args()
 
     repo_root = pathlib.Path(__file__).resolve().parent.parent
@@ -157,7 +175,7 @@ def main() -> int:
     installers = collect_installers(dist_dir)
     if not installers:
         print(
-            f"No installers found in {dist_dir}. Expected files like VALDEN-<version>-arm64.dmg",
+            f"No installers found in {dist_dir}. Expected files like VALDEN-<version>-arm64.dmg or VALDEN-Setup-<version>-x64.exe",
             file=sys.stderr,
         )
         return 1
