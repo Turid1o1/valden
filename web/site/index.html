@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VALDEN Удалённый Доступ</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card">
+        <div class="brand">
+          <img class="brand-logo" src="/assets/logo-main.png" alt="Логотип VALDEN" />
+          <div>
+            <h1>VALDEN</h1>
+            <p class="subtitle">Безопасный удалённый доступ для macOS</p>
+          </div>
+        </div>
+        <ul>
+          <li>Приоритет P2P в WebRTC с автоматическим переключением на TURN</li>
+          <li>Передача файлов и синхронизация буфера обмена</li>
+          <li>Диагностика сессии и автопереподключение</li>
+        </ul>
+        <div class="actions">
+          <a id="downloadArm64" class="btn" href="/downloads/VALDEN-latest-arm64.dmg" download>
+            Скачать для Apple Silicon
+          </a>
+          <a id="downloadX64" class="btn ghost" href="/downloads/VALDEN-latest-x64.dmg" download>
+            Скачать для Intel Mac
+          </a>
+          <a class="btn ghost" href="https://signal.valden.space" target="_blank" rel="noreferrer">API-сервер</a>
+        </div>
+        <p id="downloadStatus" class="download-status">Проверка актуальных установщиков...</p>
+      </section>
+    </main>
+    <script src="/downloads.js" defer></script>
+  </body>
+</html>

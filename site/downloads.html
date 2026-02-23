@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Скачать установщики VALDEN для macOS, Windows и Linux." />
+    <title>VALDEN — Скачать</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/star-user.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=Tektur:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="page page-content">
+    <canvas id="star-canvas" aria-hidden="true"></canvas>
+    <div class="sky-vignette" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="VALDEN">
+        <img src="./assets/star-user.svg" alt="Логотип VALDEN" />
+        <span>VALDEN</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Навигация сайта">
+        <a href="./index.html">Главная</a>
+        <a href="./downloads.html" class="is-active" data-popup="downloadWindow">Скачать</a>
+        <a href="./features.html" data-popup="featuresWindow">Возможности</a>
+        <a href="./faq.html" data-popup="faqWindow">FAQ</a>
+        <a href="./login.html" data-popup="loginWindow">Войти</a>
+      </nav>
+    </header>
+
+    <main class="screen content-screen">
+      <section class="panel">
+        <p class="kicker">Скачать</p>
+        <h1>Установщики VALDEN</h1>
+        <p class="panel-lead">После входа создаётся персональная активация: приложение подключается к вашему аккаунту без ручного копирования токена.</p>
+        <div id="downloadAuthState" class="download-auth-state"></div>
+
+        <div class="download-grid">
+          <article class="download-card">
+            <h3>macOS</h3>
+            <p>Apple Silicon (M1/M2/M3/M4)</p>
+            <button class="download-btn" data-platform="macos" data-installer-url="/downloads/VALDEN-latest-arm64.dmg">
+              Скачать для macOS (M-серия)
+            </button>
+          </article>
+
+          <article class="download-card">
+            <h3>macOS</h3>
+            <p>Intel (x64)</p>
+            <button class="download-btn" data-platform="macos" data-installer-url="/downloads/VALDEN-latest-x64.dmg">
+              Скачать для macOS (Intel)
+            </button>
+          </article>
+
+          <article class="download-card">
+            <h3>Windows</h3>
+            <p>Windows 10/11 x64</p>
+            <button class="download-btn" data-platform="windows" data-installer-url="/downloads/VALDEN-latest-x64.exe">Скачать для Windows</button>
+          </article>
+        </div>
+        <p id="bootstrapHint" class="auth-message"></p>
+      </section>
+    </main>
+
+    <script src="./sky.js"></script>
+    <script src="./auth.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>

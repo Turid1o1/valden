@@ -1,0 +1,52 @@
+# macOS / Finder
+.DS_Store
+**/.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+secrets/
+*.p8
+*.p12
+*.mobileprovision
+AuthKey_*.p8
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Electron build artifacts
+client/dist/
+client/release/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Generated runtime files
+infra/certs/
+infra/coturn/turnserver.conf
+web/certs/
+backend/server
+backend/valden-server-*
+
+# Generated reports
+tests/network-matrix/reports/
+
+# Website generated installers (keep manifest)
+web/site/downloads/VALDEN-*.dmg
+web/site/downloads/VALDEN-*.zip
+web/site/downloads/VALDEN-*.blockmap
+web/site/downloads/VALDEN-latest-*.dmg
+web/site/downloads/VALDEN-latest-*.zip

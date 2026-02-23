@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Вход в аккаунт VALDEN." />
+    <title>VALDEN — Войти</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/star-user.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=Tektur:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="page page-content">
+    <canvas id="star-canvas" aria-hidden="true"></canvas>
+    <div class="sky-vignette" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="VALDEN">
+        <img src="./assets/star-user.svg" alt="Логотип VALDEN" />
+        <span>VALDEN</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Навигация сайта">
+        <a href="./index.html">Главная</a>
+        <a href="./downloads.html" data-popup="downloadWindow">Скачать</a>
+        <a href="./features.html" data-popup="featuresWindow">Возможности</a>
+        <a href="./faq.html" data-popup="faqWindow">FAQ</a>
+        <a href="./login.html" class="is-active" data-popup="loginWindow">Войти</a>
+      </nav>
+    </header>
+
+    <main class="screen content-screen">
+      <section class="panel auth-panel">
+        <p class="kicker">Авторизация</p>
+        <h1>Курс на ваш аккаунт</h1>
+
+        <form class="auth-form single" action="#" method="post">
+          <label>
+            Email
+            <input id="loginEmail" type="email" name="email" autocomplete="email" placeholder="you@example.com" required />
+          </label>
+          <label>
+            Пароль
+            <input id="loginPassword" type="password" name="password" autocomplete="current-password" placeholder="••••••••" required />
+          </label>
+          <button id="loginSubmit" class="btn btn-solid" type="submit">Войти</button>
+        </form>
+        <p id="authMessage" class="auth-message" aria-live="polite"></p>
+
+        <p class="auth-switch">
+          Нет аккаунта? <a href="./register.html" data-popup="registerWindow">Зарегистрироваться</a>
+        </p>
+      </section>
+    </main>
+
+    <script src="./sky.js"></script>
+    <script src="./auth.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>

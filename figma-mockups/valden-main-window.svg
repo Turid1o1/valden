@@ -1,0 +1,95 @@
+<svg width="820" height="580" viewBox="0 0 820 580" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="410" y1="0" x2="410" y2="580" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0E1630"/>
+      <stop offset="0.52" stop-color="#0B1224"/>
+      <stop offset="1" stop-color="#080D18"/>
+    </linearGradient>
+    <radialGradient id="nebulaA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(180 150) rotate(32) scale(320 200)">
+      <stop stop-color="#2A4F98" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#2A4F98" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebulaB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(650 430) rotate(20) scale(340 220)">
+      <stop stop-color="#1F3D7A" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#1F3D7A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldButton" x1="410" y1="438" x2="410" y2="486" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD978"/>
+      <stop offset="1" stop-color="#F5C451"/>
+    </linearGradient>
+    <linearGradient id="logoGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE8A4"/>
+      <stop offset="1" stop-color="#F5C451"/>
+    </linearGradient></defs>
+
+  <rect width="820" height="580" fill="#0B0F17"/>
+  <rect width="820" height="580" fill="url(#bg)"/>
+  <rect width="820" height="580" fill="url(#nebulaA)"/>
+  <rect width="820" height="580" fill="url(#nebulaB)"/>
+
+  <g opacity="0.68" fill="#D7E8FF">
+    <circle cx="56" cy="48" r="1.1"/><circle cx="118" cy="84" r="0.9"/><circle cx="188" cy="58" r="1.3"/><circle cx="262" cy="86" r="1"/>
+    <circle cx="336" cy="62" r="1.1"/><circle cx="408" cy="42" r="1"/><circle cx="484" cy="74" r="1.2"/><circle cx="558" cy="50" r="1.1"/>
+    <circle cx="636" cy="78" r="1"/><circle cx="744" cy="56" r="1.1"/><circle cx="86" cy="202" r="1"/><circle cx="176" cy="226" r="0.9"/>
+    <circle cx="248" cy="190" r="1.3"/><circle cx="324" cy="234" r="1"/><circle cx="402" cy="204" r="1.2"/><circle cx="468" cy="228" r="1"/>
+    <circle cx="540" cy="186" r="1.2"/><circle cx="618" cy="220" r="0.9"/><circle cx="690" cy="192" r="1"/><circle cx="768" cy="228" r="1"/>
+    <circle cx="72" cy="430" r="1.2"/><circle cx="146" cy="386" r="1"/><circle cx="236" cy="432" r="1.2"/><circle cx="304" cy="404" r="1"/>
+    <circle cx="382" cy="448" r="1.1"/><circle cx="462" cy="388" r="1.2"/><circle cx="534" cy="438" r="1"/><circle cx="610" cy="398" r="1.3"/>
+    <circle cx="686" cy="442" r="1"/><circle cx="756" cy="396" r="1.1"/><circle cx="94" cy="546" r="1"/><circle cx="178" cy="512" r="1.1"/>
+    <circle cx="268" cy="548" r="1"/><circle cx="354" cy="516" r="1.1"/><circle cx="438" cy="544" r="0.9"/><circle cx="518" cy="510" r="1.2"/>
+    <circle cx="604" cy="548" r="1"/><circle cx="682" cy="514" r="1.1"/><circle cx="744" cy="546" r="1"/>
+  </g>
+
+  <rect x="0" y="0" width="820" height="56" fill="#0F1623" fill-opacity="0.9"/>
+  <rect x="0" y="55" width="820" height="1" fill="#253E61"/>
+
+  <g transform="translate(24 14)">
+    <path d="M14 0L16.6 11.4L28 14L16.6 16.6L14 28L11.4 16.6L0 14L11.4 11.4L14 0Z" fill="url(#logoGold)"/>
+    <text x="38" y="19" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="22" font-weight="600" letter-spacing="0.08em">VALDEN</text>
+  </g>
+
+  <g transform="translate(438 17)">
+    <circle cx="6" cy="6" r="5" fill="#3BE374"/>
+    <text x="18" y="10" fill="#3BE374" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Подключен</text>
+    <circle cx="112" cy="6" r="5" fill="#F5C451"/>
+    <text x="124" y="10" fill="#F5C451" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Переподключение</text>
+    <circle cx="254" cy="6" r="5" fill="#FF4D4F"/>
+    <text x="266" y="10" fill="#FF4D4F" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Нет соединения</text>
+  </g>
+
+  <g>
+    <rect x="170" y="92" width="480" height="420" rx="18" fill="#0F1623" fill-opacity="0.9"/>
+    <rect x="170.5" y="92.5" width="479" height="419" rx="17.5" stroke="#274769"/>
+
+    <text x="410" y="152" text-anchor="middle" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="22" font-weight="600">Ваш ID</text>
+    <text x="410" y="220" text-anchor="middle" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="40" font-weight="700" letter-spacing="0.04em">482 193 775</text>
+
+    <rect x="230" y="240" width="172" height="40" rx="12" fill="#111827"/>
+    <rect x="230.5" y="240.5" width="171" height="39" rx="11.5" stroke="#2A3C57"/>
+    <text x="316" y="265" text-anchor="middle" fill="#D8E6FA" font-family="Inter, Manrope, sans-serif" font-size="14" font-weight="600">Копировать</text>
+
+    <rect x="418" y="240" width="172" height="40" rx="12" fill="#111827"/>
+    <rect x="418.5" y="240.5" width="171" height="39" rx="11.5" stroke="#2A3C57"/>
+    <text x="504" y="265" text-anchor="middle" fill="#D8E6FA" font-family="Inter, Manrope, sans-serif" font-size="14" font-weight="600">Обновить</text>
+
+    <rect x="210" y="304" width="400" height="1" fill="#253E61"/>
+
+    <text x="410" y="348" text-anchor="middle" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="22" font-weight="600">Подключиться к удаленному ПК</text>
+
+    <text x="230" y="376" fill="#9CA3AF" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">ID устройства</text>
+    <rect x="230" y="388" width="360" height="48" rx="12" fill="#111827"/>
+    <rect x="230.5" y="388.5" width="359" height="47" rx="11.5" stroke="#2A3C57"/>
+    <text x="246" y="417" fill="#6B7280" font-family="Inter, Manrope, sans-serif" font-size="14" font-weight="400">Введите ID</text>
+
+    <rect x="230" y="452" width="360" height="48" rx="14" fill="url(#goldButton)"/>
+    <text x="410" y="482" text-anchor="middle" fill="#111827" font-family="Inter, Manrope, sans-serif" font-size="14" font-weight="600">Подключиться</text>
+
+    <text x="410" y="526" text-anchor="middle" fill="#9CA3AF" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Если сервер offline, кнопка будет отключена и появится сообщение “Нет соединения с сервером”.</text>
+  </g>
+
+  <g transform="translate(24 556)">
+    <text x="0" y="0" fill="#9CA3AF" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Аккаунт: valden.user@example.com</text>
+    <text x="630" y="0" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Настройки</text>
+    <text x="708" y="0" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Выйти</text>
+  </g>
+</svg>

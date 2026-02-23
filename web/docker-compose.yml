@@ -1,0 +1,12 @@
+services:
+  website:
+    image: nginx:1.27-alpine
+    container_name: valden-website
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./site:/usr/share/nginx/html:ro
+      - ./certs:/etc/nginx/certs:ro

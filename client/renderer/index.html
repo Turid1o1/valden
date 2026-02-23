@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VALDEN</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="space-bg"></div>
+    <div class="space-stars"></div>
+
+    <div id="appRoot" class="app-root">
+      <header class="topbar">
+        <div class="brand">
+          <img src="./assets/logo-source.png" alt="VALDEN" />
+          <span>VALDEN</span>
+        </div>
+
+        <div class="topbar-statuses" aria-label="Статусы сигналинга">
+          <span id="serverStateConnected" class="status-chip is-on"><i></i>Подключен</span>
+          <span id="serverStateReconnecting" class="status-chip is-warn"><i></i>Переподключение</span>
+          <span id="serverStateOffline" class="status-chip is-off"><i></i>Нет соединения</span>
+        </div>
+
+      </header>
+
+      <main class="screens">
+        <section id="loginScreen" class="screen screen-login">
+          <div class="card auth-card">
+            <div class="card-logo">
+              <img src="./assets/logo-source.png" alt="VALDEN" />
+              <span>VALDEN</span>
+            </div>
+            <h1>Вход в аккаунт</h1>
+
+            <label>
+              <span>Email</span>
+              <input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+            </label>
+
+            <label>
+              <span>Пароль</span>
+              <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </label>
+
+            <button id="loginSubmit" class="gold-btn" type="button">Войти</button>
+            <div class="token-divider">или</div>
+            <label>
+              <span>Bootstrap токен</span>
+              <input id="bootstrapToken" type="text" placeholder="Вставьте токен из сайта" />
+            </label>
+            <button id="bootstrapConsumeBtn" class="outline-btn" type="button">Активировать токен</button>
+            <p id="loginError" class="error-text" aria-live="polite"></p>
+            <p class="login-note">Нет аккаунта? Зарегистрируйтесь на сайте и войдите в приложение.</p>
+          </div>
+        </section>
+
+        <section id="mainScreen" class="screen screen-main is-hidden">
+          <div class="card main-card">
+            <div class="id-title">Ваш ID</div>
+            <div id="devicePublicId" class="device-id">---</div>
+
+            <div class="row-buttons">
+              <button id="copyPublicIdBtn" class="outline-btn" type="button">Копировать</button>
+              <button id="refreshDeviceBtn" class="outline-btn" type="button">Обновить</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <h2>Подключиться к удаленному ПК</h2>
+            <label>
+              <span>ID устройства</span>
+              <input id="viewerTargetDeviceId" type="text" placeholder="Введите ID" />
+            </label>
+
+            <button id="viewerRequestSession" class="gold-btn" type="button">Подключиться</button>
+            <p id="connectInfo" class="hint-text">Статус соединения с сервером отображается в верхней панели.</p>
+          </div>
+
+          <div class="main-footer">
+            <span>Аккаунт: <strong id="accountEmail">-</strong></span>
+            <div class="footer-links">
+              <button id="settingsBtn" class="link-btn" type="button">Настройки</button>
+              <button id="logoutBtn" class="link-btn" type="button">Выйти</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="sessionScreen" class="screen screen-session is-hidden">
+          <div class="session-topbar">
+            <div class="session-left">
+              Подключено к: <strong id="sessionDeviceLabel">DEVICE</strong>
+              <span class="dot-on"></span>
+            </div>
+            <div class="session-center">
+              Сессия <strong id="sessionTimer">00:00:00</strong>
+            </div>
+            <div class="session-actions">
+              <button id="sessionFullscreenBtn" class="icon-btn" type="button" title="Fullscreen">▣</button>
+              <button id="sessionSettingsBtn" class="icon-btn" type="button" title="Settings">☰</button>
+              <button id="hangupBtn" class="danger-btn" type="button">Завершить</button>
+            </div>
+          </div>
+
+          <div class="session-stage">
+            <video id="remoteVideo" autoplay playsinline tabindex="0"></video>
+            <video id="localVideo" autoplay playsinline muted class="local-hidden"></video>
+          </div>
+
+          <div class="session-bottombar">
+            <div class="session-metrics">
+              <span>Ping <strong id="statusRtt">-</strong></span>
+              <span>FPS <strong id="fpsValue">-</strong></span>
+              <span>Quality <strong id="qualityValue">Auto</strong></span>
+            </div>
+
+            <div class="session-quality">
+              <button id="qualityAutoBtn" class="quality-btn is-active" type="button">Auto</button>
+              <button id="quality720Btn" class="quality-btn" type="button">720p</button>
+              <button id="quality1080Btn" class="quality-btn" type="button">1080p</button>
+            </div>
+
+            <div class="session-tools">
+              <button id="switchMonitorBtn" class="outline-btn small" type="button">Переключить монитор</button>
+              <button id="ctrlAltDelBtn" class="outline-btn small" type="button">Ctrl+Alt+Del</button>
+              <button id="fileTransferBtn" class="outline-btn small disabled" type="button">Передача файлов</button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="legacyNodes" class="legacy-hidden" aria-hidden="true">
+      <button id="themeToggle" type="button">theme</button>
+      <button id="roleAgentBtn" type="button">agent</button>
+      <button id="roleViewerBtn" type="button">viewer</button>
+      <div id="agentPanel"></div>
+      <div id="viewerPanel"></div>
+
+      <input id="signalBase" type="text" value="https://api.valden.space" />
+
+      <button id="agentRegister" type="button">register</button>
+      <button id="agentConnectWs" type="button">connect ws</button>
+      <button id="agentDisconnectWs" type="button">disconnect ws</button>
+      <input id="agentDeviceId" type="text" />
+      <input id="agentDeviceToken" type="text" />
+      <button id="agentGenerateOtp" type="button">otp</button>
+      <button id="agentStartShare" type="button">start share</button>
+      <span id="agentOtp"></span>
+      <span id="agentOtpExpires"></span>
+      <input id="agentAutoAccept" type="checkbox" />
+      <button id="agentAcceptNow" type="button">accept now</button>
+      <input id="agentEnableInput" type="checkbox" checked />
+      <input id="agentPendingSession" type="text" />
+      <span id="permAccessibility"></span>
+      <span id="permScreen"></span>
+      <button id="permRefresh" type="button">perm refresh</button>
+      <button id="permPromptAccessibility" type="button">perm prompt</button>
+      <button id="permOpenAccessibility" type="button">perm open a11y</button>
+      <button id="permOpenScreen" type="button">perm open screen</button>
+
+      <input id="viewerOtp" type="text" />
+      <button id="viewerConnectWs" type="button">viewer ws</button>
+      <button id="viewerDisconnectWs" type="button">viewer ws off</button>
+      <input id="viewerDeviceId" type="text" />
+      <input id="viewerSessionId" type="text" />
+
+      <span id="statusRole"></span>
+      <span id="statusWs"></span>
+      <span id="statusSession"></span>
+      <span id="statusPc"></span>
+      <span id="statusTransport"></span>
+
+      <input id="remoteInputToggle" type="checkbox" checked />
+      <input id="remoteTextInput" type="text" />
+      <button id="sendRemoteText" type="button">send remote text</button>
+
+      <input id="fileInput" type="file" />
+      <button id="sendFileBtn" type="button">send file</button>
+      <progress id="fileOutProgress" max="100" value="0"></progress>
+      <span id="fileOutLabel"></span>
+      <progress id="fileInProgress" max="100" value="0"></progress>
+      <span id="fileInLabel"></span>
+      <div id="incomingDownloads"></div>
+
+      <input id="clipboardToggle" type="checkbox" />
+      <textarea id="clipboardText"></textarea>
+      <button id="pushClipboard" type="button">push clipboard</button>
+      <button id="pullClipboard" type="button">pull clipboard</button>
+
+      <button id="exportDiagnostics" type="button">export diagnostics</button>
+      <button id="clearLogs" type="button">clear logs</button>
+      <pre id="logOutput"></pre>
+    </div>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-02-21T12:30:42+00:00",
+  "version": "0.1.0",
+  "installers": [
+    {
+      "arch": "arm64",
+      "format": "dmg",
+      "version": "0.1.0",
+      "url": "/downloads/VALDEN-latest-arm64.dmg",
+      "filename": "VALDEN-latest-arm64.dmg",
+      "source_filename": "VALDEN-0.1.0-arm64.dmg",
+      "size_bytes": 102379320,
+      "sha256": "4cc5876eb156298da91bdeb1d1d4b14ad1d06fdfd6c5e197337dc56d428c545b"
+    },
+    {
+      "arch": "x64",
+      "format": "dmg",
+      "version": "0.1.0",
+      "url": "/downloads/VALDEN-latest-x64.dmg",
+      "filename": "VALDEN-latest-x64.dmg",
+      "source_filename": "VALDEN-0.1.0.dmg",
+      "size_bytes": 108475757,
+      "sha256": "15a69124c35a47a13cd9eff386a3f931b9a4c00886c426a51ebfd990eeed603f"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+<svg width="1024" height="720" viewBox="0 0 1024 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="512" y1="0" x2="512" y2="720" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0E1630"/>
+      <stop offset="0.52" stop-color="#0B1224"/>
+      <stop offset="1" stop-color="#080D18"/>
+    </linearGradient>
+    <radialGradient id="nebulaA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(230 180) rotate(38) scale(360 220)">
+      <stop stop-color="#2A4F98" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#2A4F98" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebulaB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(780 540) rotate(18) scale(410 260)">
+      <stop stop-color="#1F3D7A" stop-opacity="0.36"/>
+      <stop offset="1" stop-color="#1F3D7A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldButton" x1="512" y1="474" x2="512" y2="522" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD978"/>
+      <stop offset="1" stop-color="#F5C451"/>
+    </linearGradient>
+    <linearGradient id="logoGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE8A4"/>
+      <stop offset="1" stop-color="#F5C451"/>
+    </linearGradient>
+    <filter id="cardBlur" x="250" y="98" width="524" height="524" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter></defs>
+
+  <rect width="1024" height="720" fill="#0B0F17"/>
+  <rect width="1024" height="720" fill="url(#bg)"/>
+  <rect width="1024" height="720" fill="url(#nebulaA)"/>
+  <rect width="1024" height="720" fill="url(#nebulaB)"/>
+
+  <g opacity="0.75" fill="#D7E8FF">
+    <circle cx="74" cy="62" r="1.2"/><circle cx="126" cy="92" r="1"/><circle cx="210" cy="55" r="1.4"/><circle cx="322" cy="97" r="0.9"/>
+    <circle cx="410" cy="70" r="1.1"/><circle cx="503" cy="42" r="1"/><circle cx="628" cy="89" r="1.2"/><circle cx="754" cy="58" r="1.3"/>
+    <circle cx="840" cy="90" r="1"/><circle cx="930" cy="66" r="1.1"/><circle cx="92" cy="204" r="1.1"/><circle cx="178" cy="232" r="0.9"/>
+    <circle cx="265" cy="188" r="1.5"/><circle cx="348" cy="238" r="1"/><circle cx="476" cy="206" r="1.2"/><circle cx="576" cy="232" r="1"/>
+    <circle cx="664" cy="185" r="1.3"/><circle cx="782" cy="222" r="0.9"/><circle cx="876" cy="194" r="1.1"/><circle cx="964" cy="228" r="1"/>
+    <circle cx="57" cy="426" r="1.2"/><circle cx="150" cy="380" r="1"/><circle cx="268" cy="432" r="1.3"/><circle cx="364" cy="404" r="1"/>
+    <circle cx="452" cy="448" r="1.1"/><circle cx="528" cy="386" r="1.2"/><circle cx="618" cy="438" r="1"/><circle cx="724" cy="398" r="1.4"/>
+    <circle cx="816" cy="442" r="1"/><circle cx="918" cy="396" r="1.1"/><circle cx="94" cy="618" r="1"/><circle cx="182" cy="580" r="1.2"/>
+    <circle cx="286" cy="622" r="1"/><circle cx="382" cy="578" r="1.1"/><circle cx="482" cy="614" r="0.9"/><circle cx="586" cy="570" r="1.3"/>
+    <circle cx="682" cy="624" r="1"/><circle cx="778" cy="576" r="1.2"/><circle cx="872" cy="614" r="1"/><circle cx="944" cy="566" r="1.1"/>
+  </g>
+
+  <g opacity="0.35">
+    <rect x="302" y="138" width="420" height="444" rx="18" fill="#89B9FF" filter="url(#cardBlur)"/>
+  </g>
+
+  <g>
+    <rect x="302" y="138" width="420" height="444" rx="18" fill="#0F1623" fill-opacity="0.9"/>
+    <rect x="302.5" y="138.5" width="419" height="443" rx="17.5" stroke="#274769"/>
+  </g>
+
+  <g transform="translate(80 52)">
+    <path d="M18 0L21.2 14.8L36 18L21.2 21.2L18 36L14.8 21.2L0 18L14.8 14.8L18 0Z" fill="url(#logoGold)"/>
+    <text x="50" y="23" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="22" font-weight="600" letter-spacing="0.08em">VALDEN</text>
+  </g>
+
+  <g transform="translate(762 60)">
+    <circle cx="6" cy="6" r="5" fill="#3BE374"/>
+    <text x="20" y="10" fill="#3BE374" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Подключен к серверу</text>
+  </g>
+
+  <g transform="translate(336 178)">
+    <g transform="translate(130 0)">
+      <path d="M14 0L16.5 11.5L28 14L16.5 16.5L14 28L11.5 16.5L0 14L11.5 11.5L14 0Z" fill="url(#logoGold)"/>
+      <text x="38" y="19" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="22" font-weight="600" letter-spacing="0.08em">VALDEN</text>
+    </g>
+
+    <text x="0" y="76" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="22" font-weight="600">Вход в аккаунт</text>
+
+    <text x="0" y="116" fill="#9CA3AF" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Email</text>
+    <rect x="0" y="128" width="352" height="48" rx="12" fill="#111827"/>
+    <rect x="0.5" y="128.5" width="351" height="47" rx="11.5" stroke="#2A3C57"/>
+    <text x="16" y="157" fill="#6B7280" font-family="Inter, Manrope, sans-serif" font-size="14" font-weight="400">you@example.com</text>
+
+    <text x="0" y="196" fill="#9CA3AF" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Пароль</text>
+    <rect x="0" y="208" width="352" height="48" rx="12" fill="#111827"/>
+    <rect x="0.5" y="208.5" width="351" height="47" rx="11.5" stroke="#2A3C57"/>
+    <text x="16" y="237" fill="#6B7280" font-family="Inter, Manrope, sans-serif" font-size="14" font-weight="400">••••••••••••</text>
+
+    <rect x="0" y="280" width="352" height="48" rx="14" fill="url(#goldButton)"/>
+    <text x="176" y="309" text-anchor="middle" fill="#101521" font-family="Inter, Manrope, sans-serif" font-size="14" font-weight="600">Войти</text>
+
+    <text x="0" y="352" fill="#FF4D4F" font-family="Inter, Manrope, sans-serif" font-size="12" font-weight="400">Ошибка входа: неверный email или пароль</text>
+
+    <text x="176" y="396" text-anchor="middle" fill="#EAEFF5" font-family="Inter, Manrope, sans-serif" font-size="14" font-weight="400">Нет аккаунта? Зарегистрироваться</text>
+  </g>
+</svg>
